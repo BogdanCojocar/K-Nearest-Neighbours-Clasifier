@@ -2,7 +2,6 @@
  * File:   KNearestKneighbours.h
  * Author: Bogdan Cojocar
  *
- * Created on March 4, 2014, 9:41 PM
  */
 
 #ifndef KNEARESTNEIGHBOURS_H
