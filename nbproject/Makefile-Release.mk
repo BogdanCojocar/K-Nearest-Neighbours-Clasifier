@@ -37,6 +37,12 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/Main.o
 
+# Test Directory
+TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
+
+# Test Files
+TESTFILES= \
+	${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/knearestneighbours
 
 # C Compiler Flags
 CFLAGS=
@@ -69,6 +75,41 @@ ${OBJECTDIR}/Main.o: Main.cpp
 
 # Subprojects
 .build-subprojects:
+
+# Build Test Targets
+.build-tests-conf: .build-conf ${TESTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/knearestneighbours: ${TESTDIR}/TestKNearestNeighbours.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
+	${LINK.cc}   -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/knearestneighbours $^ ${LDLIBSOPTIONS} 
+
+
+${TESTDIR}/TestKNearestNeighbours.o: TestKNearestNeighbours.cpp 
+	${MKDIR} -p ${TESTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${TESTDIR}/TestKNearestNeighbours.o TestKNearestNeighbours.cpp
+
+
+${OBJECTDIR}/Main_nomain.o: ${OBJECTDIR}/Main.o Main.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/Main.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Main_nomain.o Main.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/Main.o ${OBJECTDIR}/Main_nomain.o;\
+	fi
+
+# Run Test Targets
+.test-conf:
+	@if [ "${TEST}" = "" ]; \
+	then  \
+	    ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/knearestneighbours || true; \
+	else  \
+	    ./${TEST} || true; \
+	fi
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
