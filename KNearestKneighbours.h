@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cmath>
 #include <functional>
 #include <map>
@@ -32,7 +33,7 @@ public:
     KNearestNeighbours();
     ~KNearestNeighbours();
 
-    void computeDistances(const FeatureSet& featureSet, const Feature& sample);
+    void computeDistances(FeatureSet& featureSet, const Array& sample);
     T getBestClass();
     void setDistance(Distance distance);
     void SetNumberOfNeighbours(unsigned int number);
@@ -66,24 +67,33 @@ void KNearestNeighbours<T, N>::SetNumberOfNeighbours(unsigned int number) {
 }
 
 template <typename T, unsigned int N>
-void KNearestNeighbours<T, N>::computeDistances(const FeatureSet& featureSet,
-        const Feature& sample) {
+void KNearestNeighbours<T, N>::computeDistances(FeatureSet& featureSet,
+        const Array& sample) {
     for (Feature& feature : featureSet) {
-        distances.push_back(std::make_pair(calculateDistance(feature, sample),
-                feature.second));
+        distances.push_back(std::make_pair(feature.second, 
+                calculateDistance(feature.first, sample)));
     }
 }
 
 template <typename T, unsigned int N>
 T KNearestNeighbours<T, N>::getBestClass() {
-    auto comp = [](const std::pair<T, double>& rhs, const std::pair<T, double>& lhs) {
-                return rhs.second < lhs.second;
+    auto comp = [](const std::pair<T, double>& lhs, const std::pair<T, double>& rhs) {
+                return lhs.second < rhs.second;
             };
     std::sort(distances.begin(), distances.end(), comp);
-    std::map<T, double, decltype(comp)> countClass;
-    for (unsigned int i : numberOfNeighbours) {
-        
+ 
+    // Count the number of occurrences of each class 
+    std::map<T, unsigned int> countClass;
+    for (auto i = 0; i < numberOfNeighbours; ++i) {
+        countClass[distances[i].first]++;
     }
+    std::pair<T, unsigned int> bestClass(T(), UINT_MAX);
+    for (auto& distance : distances) {
+        if (distance.second < bestClass.second) {
+            bestClass = distance;
+        }
+    }
+    return bestClass.first;
 }
 
 template <typename T, unsigned int N>
